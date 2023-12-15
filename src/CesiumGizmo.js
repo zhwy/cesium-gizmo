@@ -1,3 +1,11 @@
+/**
+ *description: A gizmo for Cesium, can be used to adjust the model's position and pose.
+ The model needs a modelMatrix attribute so it should be generated as a primitive instead of an entity.
+ 
+ *last modified time: 2023-12-15
+ *Copyright (c) 2023 ZHENG WENYI
+ */
+
 import {
   getScaleFromTransform,
   getScaleForMinimumSize,
