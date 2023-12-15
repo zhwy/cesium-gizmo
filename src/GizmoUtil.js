@@ -142,6 +142,5 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
 export {
   getScaleForMinimumSize,
   getScaleFromTransform,
-  loadText,
   POLYLINE_RECTANGLE,
 };

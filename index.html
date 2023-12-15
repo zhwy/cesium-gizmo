@@ -3,10 +3,10 @@
   <head>
     <title>A Gizmo for Cesium Primitive</title>
     <link
-      href="https://cdn.jsdelivr.net/npm/cesium@1.92.0/Build/Cesium/Widgets/widgets.min.css"
+      href="https://cdn.jsdelivr.net/npm/cesium@1.101.0/Build/Cesium/Widgets/widgets.min.css"
       rel="stylesheet"
     />
-    <script src="https://cdn.jsdelivr.net/npm/cesium@1.92.0/Build/Cesium/Cesium.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cesium@1.101.0/Build/Cesium/Cesium.min.js"></script>
     <style>
       html,
       body,
@@ -48,63 +48,68 @@
       <div class="actions">
         <button id="translate">Translate</button>
         <button id="rotate">Rotate</button>
+        <button id="uniform_scale">Uniform Scale</button>
         <button id="scale">Scale</button>
       </div>
     </div>
     <script type="module">
       window.CESIUM_BASE_URL =
-        "https://cdn.jsdelivr.net/npm/cesium@1.92.0/Build/Cesium";
+        "https://cdn.jsdelivr.net/npm/cesium@1.101.0/Build/Cesium";
       import CesiumGizmo from "./src/CesiumGizmo.js";
 
-      Cesium.Ion.defaultAccessToken =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0MjM4NGQ4Yi05MjAzLTQ3NzMtOTZmYS05ZDE1ZWZhYTk3OWMiLCJpZCI6MTEzNTYsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NTg2ODcwMDJ9.I0-TpqepRcWIVUUI8KrhoSZp-a70sRSRveNLBXOwOto";
-
       const viewer = new Cesium.Viewer("cesiumContainer", {
+        baseLayerPicker: false,
         timeline: false,
         animation: false,
-        scene3DOnly: true,
       });
 
       window._viewer = viewer;
       viewer.scene.globe.depthTestAgainstTerrain = true;
 
-      const orgPos = Cesium.Cartesian3.fromDegrees(120, 31, 50);
-
-      const modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(
-        orgPos,
-        new Cesium.HeadingPitchRoll(0, 0, 0)
-      );
-
-      const model = viewer.scene.primitives.add(
-        Cesium.Model.fromGltf({
-          url: "./model/CesiumBalloon.glb",
-          modelMatrix: modelMatrix,
-          debugShowBoundingVolume: false,
-          scale: 1,
+      viewer.imageryLayers.removeAll();
+      viewer.imageryLayers.addImageryProvider(
+        new Cesium.UrlTemplateImageryProvider({
+          url: "http://www.google.com/maps/vt?lyrs=s@800&x={x}&y={y}&z={z}",
+          maximumLevel: 5,
         })
       );
-      model.readyPromise.then(() => {
-        viewer.camera.setView({
-          destination: Cesium.Cartesian3.fromDegrees(120, 30.9995, 100),
-          orientation: {
-            heading: 0,
-            pitch: Cesium.Math.toRadians(-45),
-            roll: 0,
-          },
-        });
-      });
 
       viewer.scene.primitives.add(
         Cesium.Model.fromGltf({
           url: "./model/CesiumBalloon.glb",
           modelMatrix: Cesium.Transforms.headingPitchRollToFixedFrame(
-            Cesium.Cartesian3.fromDegrees(120.0001, 31, 50),
-            new Cesium.HeadingPitchRoll(Cesium.Math.toRadians(-45), 0, 0)
+            Cesium.Cartesian3.fromDegrees(0, 0, 50),
+            new Cesium.HeadingPitchRoll(0, 0, 0)
+          ),
+          debugShowBoundingVolume: false,
+          scale: 1,
+        })
+      );
+
+      viewer.scene.primitives.add(
+        Cesium.Model.fromGltf({
+          url: "./model/CesiumBalloon.glb",
+          modelMatrix: Cesium.Transforms.headingPitchRollToFixedFrame(
+            Cesium.Cartesian3.fromDegrees(0.0002, 0, 50),
+            new Cesium.HeadingPitchRoll(
+              Cesium.Math.toRadians(-45),
+              Cesium.Math.toRadians(-35),
+              0
+            )
           ),
           debugShowBoundingVolume: false,
           scale: 2,
         })
       );
+
+      viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(0.0001, -0.0005, 100),
+        orientation: {
+          heading: 0,
+          pitch: Cesium.Math.toRadians(-35),
+          roll: 0,
+        },
+      });
 
       const gizmo = new CesiumGizmo({
         show: true,
@@ -124,8 +129,12 @@
         gizmo.type = CesiumGizmo.Mode.ROTATE;
       };
 
-      document.getElementById("scale").onclick = () => {
+      document.getElementById("uniform_scale").onclick = () => {
         gizmo.type = CesiumGizmo.Mode.UNIFORM_SCALE;
+      };
+
+      document.getElementById("scale").onclick = () => {
+        gizmo.type = CesiumGizmo.Mode.SCALE;
       };
     </script>
   </body>
