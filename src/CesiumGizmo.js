@@ -1,74 +1,11 @@
-import PolylineCommon from "./PolylineCommon.js";
-import { getScaleFromTransform, getScaleForMinimumSize } from "./GizmoUtil.js";
+import {
+  getScaleFromTransform,
+  getScaleForMinimumSize,
+  POLYLINE_RECTANGLE,
+} from "./gizmoUtil.js";
 
-// rewrite the shaders to make PolylineMaterialAppearance accept per-instance color attribute
-const vs = `${PolylineCommon}
-attribute vec3 position3DHigh;
-attribute vec3 position3DLow;
-attribute vec3 prevPosition3DHigh;
-attribute vec3 prevPosition3DLow;
-attribute vec3 nextPosition3DHigh;
-attribute vec3 nextPosition3DLow;
-attribute vec2 expandAndWidth;
-attribute vec2 st;
-attribute float batchId;
-attribute vec4 color;
-
-varying float v_width;
-varying vec2 v_st;
-varying float v_polylineAngle;
-varying vec4 v_color;
-
-void main()
-{
-    float expandDir = expandAndWidth.x;
-    float width = abs(expandAndWidth.y) + 0.5;
-    bool usePrev = expandAndWidth.y < 0.0;
-
-    vec4 p = czm_computePosition();
-    vec4 prev = czm_computePrevPosition();
-    vec4 next = czm_computeNextPosition();
-
-    float angle;
-    vec4 positionWC = getPolylineWindowCoordinates(p, prev, next, expandDir, width, usePrev, angle);
-    gl_Position = czm_viewportOrthographic * positionWC;
-
-    v_width = width;
-    v_st.s = st.s;
-    v_st.t = czm_writeNonPerspective(st.t, gl_Position.w);
-    v_polylineAngle = angle;
-    v_color = color;
-}
-        `;
-
-const fs = `
-#ifdef VECTOR_TILE
-uniform vec4 u_highlightColor;
-#endif
-
-varying vec2 v_st;
-varying vec4 v_color;
-
-void main()
-{
-    czm_materialInput materialInput;
-
-    vec2 st = v_st;
-    st.t = czm_readNonPerspective(st.t, gl_FragCoord.w);
-
-    materialInput.s = st.s;
-    materialInput.st = st;
-    materialInput.str = vec3(st, 0.0);
-
-    czm_material material = czm_getMaterial(materialInput);
-    gl_FragColor = vec4((material.diffuse + material.emission) * v_color.rgb, material.alpha * v_color.w);
-#ifdef VECTOR_TILE
-    gl_FragColor *= u_highlightColor;
-#endif
-
-    czm_writeLogDepth();
-}
-        `;
+import VS from "./axisAppearance.vert.js";
+import FS from "./axisAppearance.frag.js";
 
 const Mode = {
   TRANSLATE: "TRANSLATE",
@@ -76,77 +13,6 @@ const Mode = {
   SCALE: "SCALE",
   UNIFORM_SCALE: "UNIFORM_SCALE",
 };
-
-// modified from Cesium PolylineArrowMaterial.glsl, change the arrow to a rectangle
-const scaleMaterial = new Cesium.Material({
-  fabric: {
-    uniforms: {
-      color: Cesium.Color.WHITE,
-    },
-    source: `
-      #ifdef GL_OES_standard_derivatives
-#extension GL_OES_standard_derivatives : enable
-#endif
-
-uniform vec4 color;
-
-czm_material czm_getMaterial(czm_materialInput materialInput)
-{
-    czm_material material = czm_getDefaultMaterial(materialInput);
-
-    vec2 st = materialInput.st;
-
-#ifdef GL_OES_standard_derivatives
-    float base = 1.0 - abs(fwidth(st.s)) * 10.0 * czm_pixelRatio;
-#else
-    float base = 0.975; // 2.5% of the line will be the arrow head
-#endif
-
-    vec2 center = vec2(1.0, 0.5);
-    float ptOnUpperLine = 1.0;
-    float ptOnLowerLine = 0.0;
-
-    float halfWidth = 0.15;
-    float s = step(0.5 - halfWidth, st.t);
-    s *= 1.0 - step(0.5 + halfWidth, st.t);
-    s *= 1.0 - step(base, st.s);
-
-    float t = step(base, materialInput.st.s);
-    t *= 1.0 - step(ptOnUpperLine, st.t);
-    t *= step(ptOnLowerLine, st.t);
-
-    // Find the distance from the closest separator (region between two colors)
-    float dist;
-    if (st.s < base)
-    {
-        float d1 = abs(st.t - (0.5 - halfWidth));
-        float d2 = abs(st.t - (0.5 + halfWidth));
-        dist = min(d1, d2);
-    }
-    else
-    {
-        float d1 = czm_infinity;
-        if (st.t < 0.5 - halfWidth && st.t > 0.5 + halfWidth)
-        {
-            d1 = abs(st.s - base);
-        }
-        float d2 = abs(st.t - ptOnUpperLine);
-        float d3 = abs(st.t - ptOnLowerLine);
-        dist = min(min(d1, d2), d3);
-    }
-
-    vec4 outsideColor = vec4(0.0);
-    vec4 currentColor = mix(outsideColor, color, clamp(s + t, 0.0, 1.0));
-    vec4 outColor = czm_antialias(outsideColor, color, currentColor, dist);
-
-    outColor = czm_gammaCorrect(outColor);
-    material.diffuse = outColor.rgb;
-    material.alpha = outColor.a;
-    return material;
-}
-`,
-  },
-});
 
 function addMouseEvent(handler, viewer, scope) {
   let startPosition = new Cesium.Cartesian2(); // mouse movement start position
@@ -866,7 +732,7 @@ CesiumGizmo.prototype.update = function (frameState) {
       ypoints = [Cesium.Cartesian3.ZERO, Cesium.Cartesian3.UNIT_Y];
       zpoints = [Cesium.Cartesian3.ZERO, Cesium.Cartesian3.UNIT_Z];
       if (this.type !== Mode.TRANSLATE) {
-        material = scaleMaterial;
+        material = POLYLINE_RECTANGLE;
       }
     } else if (this.type === Mode.ROTATE) {
       // make three circles
@@ -977,8 +843,8 @@ CesiumGizmo.prototype.update = function (frameState) {
 
     const appearance = new Cesium.PolylineMaterialAppearance({
       material: material,
-      vertexShaderSource: vs,
-      fragmentShaderSource: fs,
+      vertexShaderSource: VS,
+      fragmentShaderSource: FS,
     });
 
     const axes = new Cesium.Primitive({
