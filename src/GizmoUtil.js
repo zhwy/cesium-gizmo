@@ -68,10 +68,6 @@ function getScaleFromTransform(m) {
   return [scalex, scaley, scalez];
 }
 
-async function loadText(url) {
-  return await fetch(url).then((res) => res.text());
-}
-
 // modified from Cesium PolylineArrowMaterial.glsl, change the arrow to a rectangle
 const POLYLINE_RECTANGLE = new Cesium.Material({
   fabric: {
