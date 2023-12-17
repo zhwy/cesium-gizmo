@@ -976,6 +976,7 @@ CesiumGizmo.prototype.update = function (frameState) {
         appearance,
         depthFailAppearance: appearance,
         releaseGeometryInstances: false,
+        asynchronous: false,
       });
 
       this._primitives.add(planes);
