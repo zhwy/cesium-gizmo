@@ -87,7 +87,7 @@ Whether to apply the transformation on the item, optional. Default is ```true```
 ## Precautions
 * The item to apply the gizmo must have _modelMatrix_ attribute. So if you want to use it with a model, it should be created by _Model.fromGltf_.
 * The transformation axes to the item's local space in the rotate and scale mode.
-* The shaders are written in WebGL 1.0 so versions versions higher than Cesium-1.101 are not supported. 
+* Shaders are written in WebGL 1.0 so versions higher than Cesium-1.101 are not supported. 
 
 
 
