@@ -1,3 +1,9 @@
+/**
+ *description: Custom primitive to draw the gizmo.
+ *last modified time: 2023-12-24
+ *Copyright (c) 2023 ZHENG WENYI
+ */
+
 import polylineFrag from "./polyline.frag.js";
 import polylineVert from "./polyline.vert.js";
 import { getScaleForMinimumSize } from "./gizmoUtil.js";
