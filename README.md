@@ -41,7 +41,7 @@ The Cesiumer viewer object.
 
 ```options.item```
 
-The item to apply the gizmo, optional. If assgined, it must have _modelMatrix_ attribute. So if you want to use it with a model, it should be created by _Model.fromGltf_.
+The item to apply the gizmo, optional. If assgined, it must have _modelMatrix_ attribute. So if you want to use it with a model, it should be created by _Model.fromGltfAsync_.
 
 
 ```options.mode```
@@ -50,7 +50,7 @@ The mode of the gizmo, translate, rotate or scale, optional. Default is ```Cesiu
 
 ```onDragMoving```
 
-The callback function excuted when dragging the item, optional. The callback parameter has a ```type```, representing the gizmo mode, and a ```result```, which is the ```Cartesian3``` position of the item in translate mode, the ```HeadingPitchRoll``` value in rotate mode and an array of three dimensions' scale value in scale mode.
+The callback function excuted when dragging the item, optional. The callback parameter has a ```type```, telling the gizmo mode, and a ```result```, which is the ```Cartesian3``` position of the item in translate mode, the ```HeadingPitchRoll``` value in rotate mode and an array of three dimensions' scale value in scale mode.
 
 ```options.length```
 
