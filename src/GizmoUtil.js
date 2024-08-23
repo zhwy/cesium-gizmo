@@ -75,72 +75,60 @@ const POLYLINE_RECTANGLE = new Cesium.Material({
       color: Cesium.Color.WHITE,
     },
     source: `
-      #ifdef GL_OES_standard_derivatives
-#extension GL_OES_standard_derivatives : enable
-#endif
+      uniform vec4 color;
 
-uniform vec4 color;
+      czm_material czm_getMaterial(czm_materialInput materialInput)
+      {
+          czm_material material = czm_getDefaultMaterial(materialInput);
 
-czm_material czm_getMaterial(czm_materialInput materialInput)
-{
-    czm_material material = czm_getDefaultMaterial(materialInput);
+          vec2 st = materialInput.st;
 
-    vec2 st = materialInput.st;
+          float base = 1.0 - abs(fwidth(st.s)) * 10.0 * czm_pixelRatio;
 
-#ifdef GL_OES_standard_derivatives
-    float base = 1.0 - abs(fwidth(st.s)) * 10.0 * czm_pixelRatio;
-#else
-    float base = 0.975; // 2.5% of the line will be the arrow head
-#endif
 
-    vec2 center = vec2(1.0, 0.5);
-    float ptOnUpperLine = 1.0;
-    float ptOnLowerLine = 0.0;
+          vec2 center = vec2(1.0, 0.5);
+          float ptOnUpperLine = 1.0;
+          float ptOnLowerLine = 0.0;
 
-    float halfWidth = 0.15;
-    float s = step(0.5 - halfWidth, st.t);
-    s *= 1.0 - step(0.5 + halfWidth, st.t);
-    s *= 1.0 - step(base, st.s);
+          float halfWidth = 0.15;
+          float s = step(0.5 - halfWidth, st.t);
+          s *= 1.0 - step(0.5 + halfWidth, st.t);
+          s *= 1.0 - step(base, st.s);
 
-    float t = step(base, materialInput.st.s);
-    t *= 1.0 - step(ptOnUpperLine, st.t);
-    t *= step(ptOnLowerLine, st.t);
+          float t = step(base, materialInput.st.s);
+          t *= 1.0 - step(ptOnUpperLine, st.t);
+          t *= step(ptOnLowerLine, st.t);
 
-    // Find the distance from the closest separator (region between two colors)
-    float dist;
-    if (st.s < base)
-    {
-        float d1 = abs(st.t - (0.5 - halfWidth));
-        float d2 = abs(st.t - (0.5 + halfWidth));
-        dist = min(d1, d2);
-    }
-    else
-    {
-        float d1 = czm_infinity;
-        if (st.t < 0.5 - halfWidth && st.t > 0.5 + halfWidth)
-        {
-            d1 = abs(st.s - base);
-        }
-        float d2 = abs(st.t - ptOnUpperLine);
-        float d3 = abs(st.t - ptOnLowerLine);
-        dist = min(min(d1, d2), d3);
-    }
+          // Find the distance from the closest separator (region between two colors)
+          float dist;
+          if (st.s < base)
+          {
+              float d1 = abs(st.t - (0.5 - halfWidth));
+              float d2 = abs(st.t - (0.5 + halfWidth));
+              dist = min(d1, d2);
+          }
+          else
+          {
+              float d1 = czm_infinity;
+              if (st.t < 0.5 - halfWidth && st.t > 0.5 + halfWidth)
+              {
+                  d1 = abs(st.s - base);
+              }
+              float d2 = abs(st.t - ptOnUpperLine);
+              float d3 = abs(st.t - ptOnLowerLine);
+              dist = min(min(d1, d2), d3);
+          }
 
-    vec4 outsideColor = vec4(0.0);
-    vec4 currentColor = mix(outsideColor, color, clamp(s + t, 0.0, 1.0));
-    vec4 outColor = czm_antialias(outsideColor, color, currentColor, dist);
+          vec4 outsideColor = vec4(0.0);
+          vec4 currentColor = mix(outsideColor, color, clamp(s + t, 0.0, 1.0));
+          vec4 outColor = czm_antialias(outsideColor, color, currentColor, dist);
 
-    outColor = czm_gammaCorrect(outColor);
-    material.diffuse = outColor.rgb;
-    material.alpha = outColor.a;
-    return material;
-}
-`,
+          outColor = czm_gammaCorrect(outColor);
+          material.diffuse = outColor.rgb;
+          material.alpha = outColor.a;
+          return material;
+      }`,
   },
 });
 
-export {
-  getScaleForMinimumSize,
-  getScaleFromTransform,
-  POLYLINE_RECTANGLE,
-};
+export { getScaleForMinimumSize, getScaleFromTransform, POLYLINE_RECTANGLE };

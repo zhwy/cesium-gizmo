@@ -1,8 +1,6 @@
-export default `
-
-#ifdef GL_OES_standard_derivatives
-#extension GL_OES_standard_derivatives : enable
-#endif
+export default /*glsl*/ `\
+#version 300 es
+#pragma vscode_glsllint_stage: frag
 
 float getPointOnLine(vec2 p0, vec2 p1, float x)
 {
@@ -12,19 +10,15 @@ float getPointOnLine(vec2 p0, vec2 p1, float x)
 
 uniform float u_type; // 0: arrow, 1: rectangle
 
-varying vec4 v_pickColor;
-varying vec4 v_color;
-varying vec2  v_st;
+in vec4 v_pickColor;
+in vec4 v_color;
+in vec2  v_st;
 
 void main()
 {
     vec2 st = v_st;
 
-#ifdef GL_OES_standard_derivatives
     float base = 1.0 - abs(fwidth(st.s)) * 10.0 * czm_pixelRatio;
-#else
-    float base = 0.975; // 2.5% of the line will be the arrow head
-#endif
 
     vec2 center = vec2(1.0, 0.5);
 
@@ -71,7 +65,7 @@ void main()
 
     outColor = czm_gammaCorrect(outColor);
 
-    gl_FragColor = outColor * v_color;
+    out_FragColor = outColor * v_color;
 
     czm_writeLogDepth();
 

@@ -4,10 +4,10 @@
  *Copyright (c) 2023 ZHENG WENYI
  */
 
-import polylineFrag from "./polyline.frag.js";
-import polylineVert from "./polyline.vert.js";
-import { getScaleForMinimumSize } from "./gizmoUtil.js";
-import { Mode } from "./CesiumGizmo.js";
+import polylineFrag from './polyline.frag.js';
+import polylineVert from './polyline.vert.js';
+import { getScaleForMinimumSize } from './gizmoUtil.js';
+import { Mode } from './CesiumGizmo.js';
 
 class GizmoPrimitive {
   constructor(viewer, options = {}) {
@@ -105,7 +105,7 @@ class GizmoPrimitive {
       context,
       [
         {
-          functionName: "getPickColor",
+          functionName: 'getPickColor',
           componentDatatype: Cesium.ComponentDatatype.UNSIGNED_BYTE,
           componentsPerAttribute: 4,
           normalize: true,
@@ -118,7 +118,7 @@ class GizmoPrimitive {
       context,
       [
         {
-          functionName: "getPickColor",
+          functionName: 'getPickColor',
           componentDatatype: Cesium.ComponentDatatype.UNSIGNED_BYTE,
           componentsPerAttribute: 4,
           normalize: true,
@@ -149,14 +149,14 @@ class GizmoPrimitive {
     };
 
     //  set planes pick color
-    setPickColor(this._planesBatchTable, 0, "yzPlane");
-    setPickColor(this._planesBatchTable, 1, "xzPlane");
-    setPickColor(this._planesBatchTable, 2, "xyPlane");
+    setPickColor(this._planesBatchTable, 0, 'yzPlane');
+    setPickColor(this._planesBatchTable, 1, 'xzPlane');
+    setPickColor(this._planesBatchTable, 2, 'xyPlane');
 
     // set axes pick color
-    setPickColor(this._axesBatchTable, 0, "xAxis");
-    setPickColor(this._axesBatchTable, 1, "yAxis");
-    setPickColor(this._axesBatchTable, 2, "zAxis");
+    setPickColor(this._axesBatchTable, 0, 'xAxis');
+    setPickColor(this._axesBatchTable, 1, 'yAxis');
+    setPickColor(this._axesBatchTable, 2, 'zAxis');
   }
 
   _createDrawPlanesCommand(context) {
@@ -206,13 +206,13 @@ class GizmoPrimitive {
 
     const uniformMap = {
       u_xColor() {
-        return highlightedType === "yzPlane" ? highlightColor : xColor;
+        return highlightedType === 'yzPlane' ? highlightColor : xColor;
       },
       u_yColor() {
-        return highlightedType === "xzPlane" ? highlightColor : yColor;
+        return highlightedType === 'xzPlane' ? highlightColor : yColor;
       },
       u_zColor() {
-        return highlightedType === "xyPlane" ? highlightColor : zColor;
+        return highlightedType === 'xyPlane' ? highlightColor : zColor;
       },
     };
 
@@ -221,13 +221,13 @@ class GizmoPrimitive {
         uniform vec4 u_yColor;
         uniform vec4 u_zColor;
 
-        attribute vec3 position;
-        attribute float batchId;
+        in vec3 position;
+        in float batchId;
 
-        varying vec4 v_pickColor;
-        varying vec4 v_color;
-        
-        void main() {          
+        out vec4 v_pickColor;
+        out vec4 v_color;
+
+        void main() {
 
           gl_Position = czm_modelViewProjection * vec4(position, 1.);
 
@@ -241,12 +241,13 @@ class GizmoPrimitive {
       this._planesBatchTable.getVertexShaderCallback()(vertexShaderSource);
 
     let fragmentShaderSource = `
-        varying vec4 v_pickColor;
-        varying vec4 v_color;
+        in vec4 v_pickColor;
+        in vec4 v_color;
+        // out vec4 outColor;
 
         void main() {
-          gl_FragColor = v_color;
-        }        
+          out_FragColor  = v_color;
+        }
       `;
 
     const shaderProgram = Cesium.ShaderProgram.fromCache({
@@ -274,7 +275,7 @@ class GizmoPrimitive {
       modelMatrix: this._scaledMatrix,
       // framebuffer: this.framebuffer,
       pass: Cesium.Pass.OPAQUE,
-      pickId: "v_pickColor",
+      pickId: 'v_pickColor',
     });
 
     return drawCommand;
@@ -393,23 +394,23 @@ class GizmoPrimitive {
 
     Cesium.GeometryPipeline.encodeAttribute(
       geometry,
-      "position",
-      "position3DHigh",
-      "position3DLow"
+      'position',
+      'position3DHigh',
+      'position3DLow'
     );
 
     Cesium.GeometryPipeline.encodeAttribute(
       geometry,
-      "prevPosition",
-      "prevPosition3DHigh",
-      "prevPosition3DLow"
+      'prevPosition',
+      'prevPosition3DHigh',
+      'prevPosition3DLow'
     );
 
     Cesium.GeometryPipeline.encodeAttribute(
       geometry,
-      "nextPosition",
-      "nextPosition3DHigh",
-      "nextPosition3DLow"
+      'nextPosition',
+      'nextPosition3DHigh',
+      'nextPosition3DLow'
     );
 
     const attributeLocations =
@@ -438,13 +439,13 @@ class GizmoPrimitive {
     } else {
       uniformMap = {
         u_xColor() {
-          return highlightedType === "xAxis" ? highlightColor : xColor;
+          return highlightedType === 'xAxis' ? highlightColor : xColor;
         },
         u_yColor() {
-          return highlightedType === "yAxis" ? highlightColor : yColor;
+          return highlightedType === 'yAxis' ? highlightColor : yColor;
         },
         u_zColor() {
-          return highlightedType === "zAxis" ? highlightColor : zColor;
+          return highlightedType === 'zAxis' ? highlightColor : zColor;
         },
         u_type() {
           return mode === Mode.TRANSLATE ? 0 : 1;
@@ -484,7 +485,7 @@ class GizmoPrimitive {
       modelMatrix: this._scaledMatrix,
       // framebuffer: this.framebuffer,
       pass: Cesium.Pass.TRANSLUCENT,
-      pickId: "v_pickColor",
+      pickId: 'v_pickColor',
       boundingVolume: new Cesium.BoundingSphere(
         Cesium.Matrix4.getTranslation(
           this.modelMatrix,
@@ -594,11 +595,11 @@ class GizmoPrimitive {
 
     const geometry = new Cesium.Geometry({
       attributes: {
-        position: mergeAttrirbutes("position"),
-        prevPosition: mergeAttrirbutes("prevPosition"),
-        nextPosition: mergeAttrirbutes("nextPosition"),
-        expandAndWidth: mergeAttrirbutes("expandAndWidth"),
-        st: mergeAttrirbutes("st"),
+        position: mergeAttrirbutes('position'),
+        prevPosition: mergeAttrirbutes('prevPosition'),
+        nextPosition: mergeAttrirbutes('nextPosition'),
+        expandAndWidth: mergeAttrirbutes('expandAndWidth'),
+        st: mergeAttrirbutes('st'),
         batchId: new Cesium.GeometryAttribute({
           componentDatatype: Cesium.ComponentDatatype.FLOAT,
           componentsPerAttribute: 1,
@@ -610,23 +611,23 @@ class GizmoPrimitive {
 
     Cesium.GeometryPipeline.encodeAttribute(
       geometry,
-      "position",
-      "position3DHigh",
-      "position3DLow"
+      'position',
+      'position3DHigh',
+      'position3DLow'
     );
 
     Cesium.GeometryPipeline.encodeAttribute(
       geometry,
-      "prevPosition",
-      "prevPosition3DHigh",
-      "prevPosition3DLow"
+      'prevPosition',
+      'prevPosition3DHigh',
+      'prevPosition3DLow'
     );
 
     Cesium.GeometryPipeline.encodeAttribute(
       geometry,
-      "nextPosition",
-      "nextPosition3DHigh",
-      "nextPosition3DLow"
+      'nextPosition',
+      'nextPosition3DHigh',
+      'nextPosition3DLow'
     );
 
     const attributeLocations =
@@ -636,13 +637,13 @@ class GizmoPrimitive {
 
     const uniformMap = {
       u_xColor() {
-        return highlightedType === "xAxis" ? highlightColor : xColor;
+        return highlightedType === 'xAxis' ? highlightColor : xColor;
       },
       u_yColor() {
-        return highlightedType === "yAxis" ? highlightColor : yColor;
+        return highlightedType === 'yAxis' ? highlightColor : yColor;
       },
       u_zColor() {
-        return highlightedType === "zAxis" ? highlightColor : zColor;
+        return highlightedType === 'zAxis' ? highlightColor : zColor;
       },
     };
 
@@ -652,11 +653,13 @@ class GizmoPrimitive {
       this._axesBatchTable.getVertexShaderCallback()(vertexShaderSource);
 
     let fragmentShaderSource = `
-        varying vec4 v_pickColor;
-        varying vec4 v_color;
+        in vec4 v_pickColor;
+        in vec4 v_color;
+
+        // out vec4 outColor;
 
         void main() {
-          gl_FragColor = v_color;
+          out_FragColor = v_color;
         }
     `;
 
@@ -685,7 +688,7 @@ class GizmoPrimitive {
       modelMatrix: this._scaledMatrix,
       // framebuffer: this.framebuffer,
       pass: Cesium.Pass.TRANSLUCENT,
-      pickId: "v_pickColor",
+      pickId: 'v_pickColor',
       boundingVolume: new Cesium.BoundingSphere(
         Cesium.Matrix4.getTranslation(
           this.modelMatrix,

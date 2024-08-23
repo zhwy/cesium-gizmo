@@ -1,10 +1,13 @@
-export default `
+export default /*glsl*/ `\
+#version 300 es
+#pragma vscode_glsllint_stage: frag
+
 #ifdef VECTOR_TILE
 uniform vec4 u_highlightColor;
 #endif
 
-varying vec2 v_st;
-varying vec4 v_color;
+in vec2 v_st;
+in vec4 v_color;
 
 void main()
 {
@@ -18,11 +21,11 @@ void main()
     materialInput.str = vec3(st, 0.0);
 
     czm_material material = czm_getMaterial(materialInput);
-    gl_FragColor = vec4((material.diffuse + material.emission) * v_color.rgb, material.alpha * v_color.w);
+    out_FragColor = vec4((material.diffuse + material.emission) * v_color.rgb, material.alpha * v_color.w);
 #ifdef VECTOR_TILE
-    gl_FragColor *= u_highlightColor;
+    out_FragColor *= u_highlightColor;
 #endif
 
     czm_writeLogDepth();
 }
-`
+`;
