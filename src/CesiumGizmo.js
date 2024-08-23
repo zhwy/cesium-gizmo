@@ -9,7 +9,7 @@ import {
   getScaleFromTransform,
   getScaleForMinimumSize,
   POLYLINE_RECTANGLE,
-} from "./gizmoUtil.js";
+} from "./GizmoUtil.js";
 
 import GizmoPrimitive from "./GizmoPrimitive.js";
 

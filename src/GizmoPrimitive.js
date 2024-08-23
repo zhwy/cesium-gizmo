@@ -6,7 +6,7 @@
 
 import polylineFrag from './polyline.frag.js';
 import polylineVert from './polyline.vert.js';
-import { getScaleForMinimumSize } from './gizmoUtil.js';
+import { getScaleForMinimumSize } from './GizmoUtil.js';
 import { Mode } from './CesiumGizmo.js';
 
 class GizmoPrimitive {
