@@ -2,7 +2,7 @@
 
 I wrote this gizmo to firgure out the model matrix calculations and to get familiar with the usage of DrawCommand in Cesium.
 
-Versions higher than Cesium-1.101 are not supported.
+Versions lower than Cesium-1.102 are not supported.
 
 Run `npm run start` to view the demo.
 
@@ -85,9 +85,9 @@ The visibility of the gizmo, optional. Default is ```true```.
 Whether to apply the transformation on the item, optional. Default is ```true```.
 
 ## Precautions
-* The item to apply the gizmo must have _modelMatrix_ attribute. So if you want to use it with a model, it should be created by _Model.fromGltf_.
+* The item to apply the gizmo must have _modelMatrix_ attribute. So if you want to use it with a model, it should be created by _Model.fromGltfAsync_.
 * The transformation axes to the item's local space in the rotate and scale mode.
-* Shaders are written in WebGL 1.0 so versions higher than Cesium-1.101 are not supported. 
+* Shaders are written in WebGL ES 3.0 so versions lower than Cesium-1.102 are not supported.
 
 
 
