@@ -1,5 +1,9 @@
 {
   "scripts": {
-    "start": "npx http-server -a localhost -p 8089 -c -1"
+    "start": "npx http-server -a localhost -p 8089 -c -1",
+    "deploy": "gh-pages -d . -r https://github.com/zhwy/cesium-gizmo.git -b main"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.1.1"
   }
 }
