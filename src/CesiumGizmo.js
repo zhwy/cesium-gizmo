@@ -9,15 +9,15 @@ import {
   getScaleFromTransform,
   getScaleForMinimumSize,
   POLYLINE_RECTANGLE,
-} from "./GizmoUtil.js";
+} from './GizmoUtil.js';
 
-import GizmoPrimitive from "./GizmoPrimitive.js";
+import GizmoPrimitive from './GizmoPrimitive.js';
 
 const Mode = {
-  TRANSLATE: "TRANSLATE",
-  ROTATE: "ROTATE",
-  SCALE: "SCALE",
-  UNIFORM_SCALE: "UNIFORM_SCALE",
+  TRANSLATE: 'TRANSLATE',
+  ROTATE: 'ROTATE',
+  SCALE: 'SCALE',
+  UNIFORM_SCALE: 'UNIFORM_SCALE',
 };
 
 function addMouseEvent(handler, viewer, scope) {
@@ -31,7 +31,10 @@ function addMouseEvent(handler, viewer, scope) {
     console.log(picked);
     if (Cesium.defined(picked)) {
       if (picked.primitive !== scope._primitive) {
-        if (picked.primitive.modelMatrix instanceof Cesium.Matrix4) {
+        if (picked.primitive instanceof Cesium.Cesium3DTileset) {
+          picked.primitive.root.modelMatrix = picked.primitive.root.transform;
+          scope.item = picked.primitive.root;
+        } else if (picked.primitive.modelMatrix instanceof Cesium.Matrix4) {
           scope.item = picked.primitive;
         }
       }
@@ -53,7 +56,7 @@ function addMouseEvent(handler, viewer, scope) {
         scope.pickedId = picked.id;
         viewer.scene.screenSpaceCameraController.enableRotate = false; // lock default map control
         viewer.scene.screenSpaceCameraController.enableTranslate = false;
-        if (typeof scope.onDragStart === "function") {
+        if (typeof scope.onDragStart === 'function') {
           scope.onDragStart();
         }
       } else {
@@ -72,7 +75,7 @@ function addMouseEvent(handler, viewer, scope) {
       scope.yColor = Cesium.Color.GREEN;
       scope.zColor = Cesium.Color.BLUE;
       scope.pickedId = null;
-      if (typeof scope.onDragEnd === "function") {
+      if (typeof scope.onDragEnd === 'function') {
         scope.onDragEnd();
       }
       startPosition = new Cesium.Cartesian2();
@@ -92,10 +95,10 @@ function addMouseEvent(handler, viewer, scope) {
       // highlight the hovered axis
       if (Cesium.defined(hovered) && hovered.primitive === scope._primitive) {
         scope._primitive.highlightedType = hovered.id.type;
-        document.body.style.cursor = "pointer";
+        document.body.style.cursor = 'pointer';
       } else {
         scope._primitive.highlightedType = null;
-        document.body.style.cursor = "default";
+        document.body.style.cursor = 'default';
       }
 
       return;
@@ -181,30 +184,30 @@ function addMouseEvent(handler, viewer, scope) {
       let translationOnX, translationOnY, translationOnZ;
 
       switch (scope.pickedId.type) {
-        case "xAxis":
+        case 'xAxis':
           translation = getTranslation(Cesium.Cartesian3.UNIT_X);
           break;
-        case "yAxis":
+        case 'yAxis':
           translation = getTranslation(Cesium.Cartesian3.UNIT_Y);
           break;
-        case "zAxis":
+        case 'zAxis':
           translation = getTranslation(Cesium.Cartesian3.UNIT_Z);
           break;
-        case "yzPlane":
+        case 'yzPlane':
           translationOnY = getTranslation(Cesium.Cartesian3.UNIT_Y);
 
           translationOnZ = getTranslation(Cesium.Cartesian3.UNIT_Z);
 
           Cesium.Cartesian3.add(translationOnY, translationOnZ, translation);
           break;
-        case "xzPlane":
+        case 'xzPlane':
           translationOnX = getTranslation(Cesium.Cartesian3.UNIT_X);
 
           translationOnZ = getTranslation(Cesium.Cartesian3.UNIT_Z);
 
           Cesium.Cartesian3.add(translationOnX, translationOnZ, translation);
           break;
-        case "xyPlane":
+        case 'xyPlane':
           translationOnX = getTranslation(Cesium.Cartesian3.UNIT_X);
 
           translationOnY = getTranslation(Cesium.Cartesian3.UNIT_Y);
@@ -238,7 +241,7 @@ function addMouseEvent(handler, viewer, scope) {
       scope.modelMatrix[13] = tmp[13];
       scope.modelMatrix[14] = tmp[14];
 
-      if (typeof scope.onDragMoving === "function") {
+      if (typeof scope.onDragMoving === 'function') {
         scope.onDragMoving({
           mode: Mode.TRANSLATE,
           result: new Cesium.Cartesian3(tmp[12], tmp[13], tmp[14]),
@@ -282,7 +285,7 @@ function addMouseEvent(handler, viewer, scope) {
       const axis = new Cesium.Cartesian3();
 
       switch (scope.pickedId.type) {
-        case "xAxis":
+        case 'xAxis':
           Cesium.Matrix4.multiplyByPointAsVector(
             scope.modelMatrix,
             Cesium.Cartesian3.UNIT_X,
@@ -296,7 +299,7 @@ function addMouseEvent(handler, viewer, scope) {
             rotation
           );
           break;
-        case "yAxis":
+        case 'yAxis':
           Cesium.Matrix4.multiplyByPointAsVector(
             scope.modelMatrix,
             Cesium.Cartesian3.UNIT_Y,
@@ -310,7 +313,7 @@ function addMouseEvent(handler, viewer, scope) {
             rotation
           );
           break;
-        case "zAxis":
+        case 'zAxis':
           Cesium.Matrix4.multiplyByPointAsVector(
             scope.modelMatrix,
             Cesium.Cartesian3.UNIT_Z,
@@ -348,7 +351,7 @@ function addMouseEvent(handler, viewer, scope) {
         new Cesium.Matrix4()
       );
 
-      if (typeof scope.onDragMoving === "function") {
+      if (typeof scope.onDragMoving === 'function') {
         scope.onDragMoving({
           mode: Mode.ROTATE,
           result:
@@ -401,7 +404,7 @@ function addMouseEvent(handler, viewer, scope) {
       };
 
       switch (scope.pickedId.type) {
-        case "xAxis":
+        case 'xAxis':
           scaleValue = getScaleValue(Cesium.Cartesian3.UNIT_X);
           if (oldScale[0] <= minimumScale && scaleValue < 1) return;
 
@@ -411,7 +414,7 @@ function addMouseEvent(handler, viewer, scope) {
           );
 
           break;
-        case "yAxis":
+        case 'yAxis':
           scaleValue = getScaleValue(Cesium.Cartesian3.UNIT_Y);
           if (oldScale[1] <= minimumScale && scaleValue < 1) return;
 
@@ -421,7 +424,7 @@ function addMouseEvent(handler, viewer, scope) {
           );
 
           break;
-        case "zAxis":
+        case 'zAxis':
           scaleValue = getScaleValue(Cesium.Cartesian3.UNIT_Z);
           if (oldScale[2] <= minimumScale && scaleValue < 1) return;
 
@@ -430,7 +433,7 @@ function addMouseEvent(handler, viewer, scope) {
             scaleMatrix
           );
           break;
-        case "xyPlane":
+        case 'xyPlane':
           scaleValue = getScaleValue(new Cesium.Cartesian3(1, 1, 0));
           if (
             (oldScale[0] <= minimumScale || oldScale[1] <= minimumScale) &&
@@ -443,7 +446,7 @@ function addMouseEvent(handler, viewer, scope) {
             scaleMatrix
           );
           break;
-        case "xzPlane":
+        case 'xzPlane':
           scaleValue = getScaleValue(new Cesium.Cartesian3(1, 0, 1));
           if (
             (oldScale[0] <= minimumScale || oldScale[2] <= minimumScale) &&
@@ -456,7 +459,7 @@ function addMouseEvent(handler, viewer, scope) {
             scaleMatrix
           );
           break;
-        case "yzPlane":
+        case 'yzPlane':
           scaleValue = getScaleValue(new Cesium.Cartesian3(0, 1, 1));
           if (
             (oldScale[1] <= minimumScale || oldScale[2] <= minimumScale) &&
@@ -479,7 +482,7 @@ function addMouseEvent(handler, viewer, scope) {
         new Cesium.Matrix4()
       );
 
-      if (typeof scope.onDragMoving === "function") {
+      if (typeof scope.onDragMoving === 'function') {
         scope.onDragMoving({
           mode: Mode.SCALE,
           result: getScaleFromTransform(finalTransform),
@@ -518,7 +521,7 @@ function addMouseEvent(handler, viewer, scope) {
         new Cesium.Matrix4()
       );
 
-      if (typeof scope.onDragMoving === "function") {
+      if (typeof scope.onDragMoving === 'function') {
         scope.onDragMoving({
           mode: Mode.UNIFORM_SCALE,
           result: getScaleFromTransform(finalTransform),
@@ -560,12 +563,14 @@ class CesiumGizmo {
 
     if (Cesium.defined(val)) {
       if (!Cesium.defined(val.modelMatrix)) {
-        new Cesium.DeveloperError("Item must have the modelMatrix attribute!");
+        throw new Cesium.DeveloperError(
+          'Item must have the modelMatrix attribute!'
+        );
       }
 
       this.modelMatrix = val.modelMatrix.clone();
     } else {
-      // todo hide gizmo primitive
+      // TODO hide gizmo primitive
     }
   }
 
@@ -574,7 +579,7 @@ class CesiumGizmo {
   }
   set modelMatrix(val) {
     if (!val instanceof Cesium.Matrix4) {
-      new Cesium.DeveloperError("modelMatrix should be Cesium.Matrix4");
+      throw new Cesium.DeveloperError('modelMatrix should be Cesium.Matrix4');
     }
 
     if (this.mode === Mode.TRANSLATE) {
@@ -596,7 +601,7 @@ class CesiumGizmo {
       // remove scale but keep translation and rotation
       // scale can't be zero
       if (scale[0] === 0 || scale[1] === 0 || scale[2] === 0) {
-        new Cesium.DeveloperError(
+        throw new Cesium.DeveloperError(
           "Can't get transform infomation from item's modelMatrix since the scaling is 0."
         );
       }
@@ -694,12 +699,14 @@ class CesiumGizmo {
     options = Cesium.defaultValue(options, Cesium.defaultValue.EMPTY_OBJECT);
 
     if (!Cesium.defined(viewer))
-      new Cesium.DeveloperError("Viewer must be assigned!");
+      throw new Cesium.DeveloperError('Viewer must be assigned!');
     if (
       Cesium.defined(options.item) &&
       !Cesium.defined(options.item.modelMatrix)
     )
-      new Cesium.DeveloperError("Item must have the modelMatrix attribute!");
+      throw new Cesium.DeveloperError(
+        'Item must have the modelMatrix attribute!'
+      );
 
     this.viewer = viewer;
 
@@ -763,7 +770,10 @@ class CesiumGizmo {
 
     this.pickedId = null;
 
-    this.applyTransformation = Cesium.defaultValue(options.applyTransformation, true);
+    this.applyTransformation = Cesium.defaultValue(
+      options.applyTransformation,
+      true
+    );
 
     this.onDragMoving = options.onDragMoving;
     this.onDragStart = options.onDragStart;

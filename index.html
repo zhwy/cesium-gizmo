@@ -40,6 +40,19 @@
         left: 0;
         z-index: 99;
       }
+
+      .results {
+        position: absolute;
+        margin: 10px;
+        top: 30px;
+        left: 0;
+        z-index: 99;
+        background-color: white;
+        color: black;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 12px;
+      }
     </style>
   </head>
 
@@ -50,6 +63,11 @@
         <button id="rotate">Rotate</button>
         <button id="uniform_scale">Uniform Scale</button>
         <button id="scale">Scale</button>
+      </div>
+      <div class="results">
+        <div id="position">position:</div>
+        <div id="rotation">rotation:</div>
+        <div id="scale_value">scale:</div>
       </div>
     </div>
     <script type="module">
@@ -115,7 +133,46 @@
       const gizmo = new CesiumGizmo(viewer, {
         show: true,
         onDragMoving: (res) => {
-          console.log(res);
+          if (res.mode === CesiumGizmo.Mode.TRANSLATE) {
+            const carto = Cesium.Cartographic.fromCartesian(res.result);
+            document.getElementById(
+              'position'
+            ).innerText = `position: ${Cesium.Math.toDegrees(
+              carto.longitude
+            )}, ${Cesium.Math.toDegrees(carto.latitude)}, ${carto.height}`;
+
+            console.log('position', {
+              lng: Cesium.Math.toDegrees(carto.longitude),
+              lat: Cesium.Math.toDegrees(carto.latitude),
+              height: carto.height,
+            });
+          }
+
+          if (res.mode === CesiumGizmo.Mode.ROTATE) {
+            document.getElementById(
+              'rotation'
+            ).innerText = `rotation: ${Cesium.Math.toDegrees(
+              res.result.heading
+            )}, ${Cesium.Math.toDegrees(
+              res.result.pitch
+            )}, ${Cesium.Math.toDegrees(res.result.roll)}`;
+
+            console.log('rotation', {
+              heading: Cesium.Math.toDegrees(res.result.heading),
+              pitch: Cesium.Math.toDegrees(res.result.pitch),
+              roll: Cesium.Math.toDegrees(res.result.roll),
+            });
+          }
+
+          if (
+            res.mode === CesiumGizmo.Mode.UNIFORM_SCALE ||
+            res.mode === CesiumGizmo.Mode.SCALE
+          ) {
+            document.getElementById(
+              'scale_value'
+            ).innerText = `scale: ${res.result}`;
+            console.log('scale', res.result);
+          }
         },
       });
 
